@@ -1,0 +1,17 @@
+dependencies:
+  espressif/esp-dsp:
+    dependencies: []
+    source:
+      path: D:\Julia_Bot\esp_proj\waveshare_demo\ESP-IDF\ESP32-S3-LCD-1.85-Test\components\espressif__esp-dsp
+      type: local
+    version: 1.4.12
+  idf:
+    source:
+      type: idf
+    version: 5.5.4
+direct_dependencies:
+- espressif/esp-dsp
+- idf
+manifest_hash: 31f15b6ac7e85f1ee54e57d55389882925d4a149fb510b17f028b2d91fd326a0
+target: esp32s3
+version: 2.0.0

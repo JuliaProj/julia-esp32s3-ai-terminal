@@ -1,0 +1,20 @@
+{
+  "1": {"class_type":"UNETLoader","inputs":{"unet_name":"flux1-dev.safetensors","weight_dtype":"default"}},
+  "2": {"class_type":"DualCLIPLoader","inputs":{"clip_name1":"t5xxl_fp16.safetensors","clip_name2":"clip_l.safetensors","type":"flux"}},
+  "3": {"class_type":"VAELoader","inputs":{"vae_name":"ae.safetensors"}},
+  "4": {"class_type":"LoadImage","inputs":{"image":"Julia_reference.jpeg"}},
+  "5": {"class_type":"PulidFluxInsightFaceLoader","inputs":{"provider":"CPU"}},
+  "6": {"class_type":"PulidFluxEvaClipLoader","inputs":{}},
+  "7": {"class_type":"PulidFluxModelLoader","inputs":{"pulid_file":"pulid_flux_v0.9.0.safetensors"}},
+  "8": {"class_type":"ApplyPulidFlux","inputs":{"model":["1",0],"pulid_flux":["7",0],"eva_clip":["6",0],"face_analysis":["5",0],"image":["4",0],"weight":1.2,"start_at":0.0,"end_at":0.95}},
+  "9": {"class_type":"CLIPTextEncode","inputs":{"text":"polished Japanese anime half-body portrait of Julia, exactly the same character as the reference image, short fluffy snow-white bob haircut with wispy layered ends, warm luminous golden amber eyes, fair skin, gentle small smile, white futuristic oversized hoodie with silver trim, calm attentive expression, subtle natural breathing posture, front-facing centered composition, head and upper torso visible, identical face proportions, identical hairstyle, identical outfit and colors, clean charcoal gray background, soft neutral studio lighting, crisp detailed eyes, delicate line art, no dark hair, no long hair, no collared shirt, no text, no watermark","clip":["2",0]}},
+  "10": {"class_type":"FluxGuidance","inputs":{"conditioning":["9",0],"guidance":3.5}},
+  "11": {"class_type":"EmptySD3LatentImage","inputs":{"width":768,"height":768,"batch_size":1}},
+  "12": {"class_type":"RandomNoise","inputs":{"noise_seed":73450291}},
+  "13": {"class_type":"KSamplerSelect","inputs":{"sampler_name":"euler"}},
+  "14": {"class_type":"BasicScheduler","inputs":{"model":["8",0],"scheduler":"simple","steps":20,"denoise":1.0}},
+  "15": {"class_type":"BasicGuider","inputs":{"model":["8",0],"conditioning":["10",0]}},
+  "16": {"class_type":"SamplerCustomAdvanced","inputs":{"noise":["12",0],"guider":["15",0],"sampler":["13",0],"sigmas":["14",0],"latent_image":["11",0]}},
+  "17": {"class_type":"VAEDecode","inputs":{"samples":["16",1],"vae":["3",0]}},
+  "18": {"class_type":"SaveImage","inputs":{"images":["17",0],"filename_prefix":"Julia/standby_baseline"}}
+}

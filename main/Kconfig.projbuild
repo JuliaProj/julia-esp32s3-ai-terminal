@@ -1,0 +1,57 @@
+menu "Julia robot configuration"
+
+config JULIA_WIFI_SSID
+    string "Wi-Fi SSID"
+    default ""
+config JULIA_WIFI_PASSWORD
+    string "Wi-Fi password"
+    default ""
+config JULIA_FIRMWARE_VERSION
+    string "Firmware version"
+    default "0.8.0"
+config JULIA_OTA_URL
+    string "Default OTA URL"
+    default ""
+config JULIA_DIAGNOSTIC_PERIOD_SECONDS
+    int "Diagnostic period in seconds"
+    range 10 3600
+    default 60
+
+choice JULIA_HOME_BACKEND
+    prompt "Home control backend"
+    default JULIA_HOME_BACKEND_VIRTUAL
+config JULIA_HOME_BACKEND_VIRTUAL
+    bool "Virtual"
+config JULIA_HOME_BACKEND_HA
+    bool "Home Assistant"
+endchoice
+config JULIA_HA_URL
+    string "Home Assistant URL"
+    default ""
+config JULIA_HA_TOKEN
+    string "Home Assistant token"
+    default ""
+
+config JULIA_AI_API_KEY
+    string "Cloud AI API key"
+    default ""
+config JULIA_AI_MODEL
+    string "Cloud AI model"
+    default "qwen3.7-plus"
+config JULIA_DASHSCOPE_FALLBACK_IP
+    string "DashScope fallback IPv4"
+    default "8.152.159.24"
+config JULIA_AI_TEST_ON_BOOT
+    bool "Run AI test on boot"
+    default n
+config JULIA_VOICE_PLAYBACK_SELF_TEST
+    bool "Run voice playback self-test"
+    default n
+
+config JULIA_SOAK_TEST
+    bool "Enable silent event-injection soak test"
+    default y
+    help
+        Disable for production firmware to remove all soak code and runtime data.
+
+endmenu

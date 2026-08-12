@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Convert avatar PNGs to alpha-free LVGL 8 RGB565 C assets.
+
+Byte order is read from the project's sdkconfig. The generated C also contains
+a compile-time guard, so assets cannot silently disagree with LVGL.
+"""
+
+import argparse
+import re
+from pathlib import Path
+
+from PIL import Image
+from PIL import ImageChops
+
+
+MAGENTA = (255, 0, 255)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def read_lv_color_16_swap(sdkconfig: Path) -> bool:
+    text = sdkconfig.read_text(encoding="utf-8")
+    if "CONFIG_LV_COLOR_16_SWAP=y" in text:
+        return True
+    if "# CONFIG_LV_COLOR_16_SWAP is not set" in text:
+        return False
+    raise ValueError(f"CONFIG_LV_COLOR_16_SWAP is missing from {sdkconfig}")
+
+
+def symbol_for(path: Path) -> str:
+    return re.sub(r"[^a-zA-Z0-9_]", "_", path.stem).lower()
+
+
+def rgb565_bytes(path: Path, chroma: bool, swap: bool) -> tuple[int, int, bytes]:
+    image = Image.open(path).convert("RGBA")
+    if not chroma and image.size != (360, 360):
+        raise ValueError(f"base image must be 360x360, got {image.width}x{image.height}")
+    output = bytearray()
+    for red, green, blue, alpha in image.get_flattened_data():
+        if chroma and alpha < 255:
+            red = (red * alpha + MAGENTA[0] * (255 - alpha) + 127) // 255
+            green = (green * alpha + MAGENTA[1] * (255 - alpha) + 127) // 255
+            blue = (blue * alpha + MAGENTA[2] * (255 - alpha) + 127) // 255
+        value = ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3)
+        output.extend((value >> 8, value & 0xFF) if swap
+                      else (value & 0xFF, value >> 8))
+    if not chroma and len(output) != 360 * 360 * 2:
+        raise ValueError(f"base payload must be 259200 bytes, got {len(output)}")
+    return image.width, image.height, bytes(output)
+
+
+def emit_asset(path: Path, chroma: bool, swap: bool) -> str:
+    width, height, payload = rgb565_bytes(path, chroma, swap)
+    symbol = symbol_for(path)
+    rows = []
+    for offset in range(0, len(payload), 16):
+        values = ", ".join(f"0x{value:02x}" for value in payload[offset:offset + 16])
+        rows.append(f"    {values},")
+    return f"""static const uint8_t {symbol}_map[] = {{
+{chr(10).join(rows)}
+}};
+
+const lv_img_dsc_t avatar_asset_{symbol} = {{
+    .header.always_zero = 0,
+    .header.w = {width},
+    .header.h = {height},
+    .header.cf = {"LV_IMG_CF_TRUE_COLOR_CHROMA_KEYED" if chroma else "LV_IMG_CF_TRUE_COLOR"},
+    .data_size = sizeof({symbol}_map),
+    .data = {symbol}_map,
+}};
+"""
+
+
+def derive_wide_mouth(closed_path: Path, open_path: Path, output_path: Path) -> None:
+    closed = Image.open(closed_path).convert("RGBA")
+    opened = Image.open(open_path).convert("RGBA")
+    difference = ImageChops.difference(closed, opened).convert("L")
+    mask = difference.point(lambda value: 255 if value > 8 else 0)
+    bbox = mask.getbbox()
+    if not bbox:
+        raise ValueError("closed/open mouth images have no differing pixels")
+    feature = opened.crop(bbox)
+    feature_mask = mask.crop(bbox)
+    width = max(1, feature.width * 6 // 5)
+    height = max(1, feature.height * 6 // 5)
+    feature = feature.resize((width, height), Image.Resampling.LANCZOS)
+    feature_mask = feature_mask.resize((width, height), Image.Resampling.LANCZOS)
+    result = closed.copy()
+    center_x = (bbox[0] + bbox[2]) // 2
+    center_y = (bbox[1] + bbox[3]) // 2
+    position = (center_x - width // 2, center_y - height // 2)
+    result.paste(feature, position, feature_mask)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    result.save(output_path)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("inputs", nargs="+", type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--header", type=Path)
+    parser.add_argument("--derive-wide-mouth", type=Path)
+    parser.add_argument("--sdkconfig", type=Path, default=PROJECT_ROOT / "sdkconfig")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--base", action="store_true", help="360x360 opaque RGB565")
+    mode.add_argument("--chroma", action="store_true", help="chroma-keyed RGB565 layer")
+    args = parser.parse_args()
+    swap = read_lv_color_16_swap(args.sdkconfig.resolve())
+
+    assets = [path.resolve() for path in args.inputs]
+    if args.derive_wide_mouth:
+        closed = next((path for path in assets if path.stem == "mouth_closed"), None)
+        opened = next((path for path in assets if path.stem == "mouth_open"), None)
+        if not closed or not opened:
+            parser.error("--derive-wide-mouth requires mouth_closed.png and mouth_open.png inputs")
+        derive_wide_mouth(closed, opened, args.derive_wide_mouth)
+        assets.append(args.derive_wide_mouth.resolve())
+    include_name = args.header.name if args.header else "lvgl.h"
+    source = ["/* Generated by tools/convert_avatar_assets.py. */", f'#include "{include_name}"',
+              f"#if LV_COLOR_16_SWAP != {1 if swap else 0}",
+              '#error "Avatar asset byte order disagrees with LV_COLOR_16_SWAP"',
+              "#endif", ""]
+    source.extend(emit_asset(path, args.chroma, swap) for path in assets)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("\n".join(source), encoding="ascii")
+
+    if args.header:
+        declarations = ["/* Generated by tools/convert_avatar_assets.py. */", "#pragma once", '#include "lvgl.h"', ""]
+        declarations.extend(
+            f"extern const lv_img_dsc_t avatar_asset_{symbol_for(path)};" for path in assets
+        )
+        args.header.parent.mkdir(parents=True, exist_ok=True)
+        args.header.write_text("\n".join(declarations) + "\n", encoding="ascii")
+
+
+if __name__ == "__main__":
+    main()

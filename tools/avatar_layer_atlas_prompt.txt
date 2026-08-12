@@ -1,0 +1,18 @@
+Use case: identity-preserve
+Asset type: ESP32-S3 LVGL 2D avatar rig layer atlas
+Primary request: Decompose the exact anime girl from the input image into a 3 by 3 atlas of independently animatable transparent layers.
+Input image: the only input is the identity, design, colors, linework, proportions, and neutral front-facing pose reference. Preserve them exactly.
+Canvas: 1024 by 1024 on a perfectly flat solid #ff00ff chroma-key background for local background removal. The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation. Do not use #ff00ff in any character part. Divide it into nine equal logical cells with no visible grid, labels, guides, shadows, or text.
+Cell order, left to right and top to bottom:
+1. torso and shoulders only, including clothing, with the neck connection completed;
+2. back hair only;
+3. head and face base only, excluding front hair, eyes, pupils, and mouth, with occluded skin naturally completed;
+4. front hair and side hair only;
+5. left eye white, lashes, and eyelid only, excluding pupil and iris;
+6. right eye white, lashes, and eyelid only, excluding pupil and iris;
+7. both iris/pupil elements as two separate compact elements in the same cell;
+8. mouth only;
+9. optional cheek blush and small facial accents only.
+Alignment: every part must retain the exact original scale and front-facing orientation. Center each isolated part within its own cell with generous transparent padding. Do not redraw parts at different scales.
+Style: preserve the original clean high-quality anime rendering, antialiased outlines, colors, highlights, and character identity.
+Constraints: crisp isolated parts only; flat #ff00ff background; no white matte; no duplicate full character; no text; no watermark; no grid; no cast shadows; no extra accessories; do not alter clothing, hair clip, face shape, eye color, or hairstyle.

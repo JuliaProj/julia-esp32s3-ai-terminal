@@ -1,0 +1,15 @@
+[
+  {"name":"net_offline","text":"网络未连接，请检查Wi-Fi","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"im_here","text":"我在","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"goodnight","text":"晚安，好梦","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"welcome_back","text":"欢迎回来","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"listen","text":"嗯，我在听","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"sorry","text":"好的，我安静待着","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"timeout","text":"我先休息啦，有事叫我","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"error","text":"出了一点小问题","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"charging","text":"正在充电中","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"low_battery","text":"电量不足，记得充电哦","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"mock_hello","text":"你好呀，今天过得怎么样？","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"mock_weather","text":"今天天气不错，适合出去走走。","voice":"zh-CN-XiaoxiaoNeural"},
+  {"name":"mock_sleep","text":"早点休息，晚安哦。","voice":"zh-CN-XiaoxiaoNeural"}
+]
