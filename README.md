@@ -46,6 +46,12 @@ idf.py -p <串口号> flash monitor
 - 平均电流、峰值电流、测试电压和记录格式。
 - 约 5 分钟无操作后进入呼吸模式的测试步骤。
 
+## UI 固件包
+
+本地发布包目录为 `release/Julia-UI-Firmware-v1.0.0/`，包含 Bootloader、应用固件、分区表、语音模型分区、Windows 烧录脚本、Flash 地址和 SHA-256 校验值。固件包的详细下载和烧录方法见其中的 `README_中文.md`。
+
+由于固件二进制体积较大且构建产物不纳入源码仓库，发布包应作为 GitHub Release 附件或校内文件服务器下载，不应直接放入 Git 提交历史。
+
 ## 项目文档
 
 - [状态素材矩阵](docs/state_asset_matrix.md)
