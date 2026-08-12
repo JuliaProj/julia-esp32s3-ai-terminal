@@ -54,6 +54,15 @@
 #ifndef JULIA_DISPLAY_LOG
 #define JULIA_DISPLAY_LOG 1
 #endif
+#ifndef DOZE_BREATHE_MIN_PERCENT
+#define DOZE_BREATHE_MIN_PERCENT 0U
+#endif
+#ifndef DOZE_BREATHE_MAX_PERCENT
+#define DOZE_BREATHE_MAX_PERCENT 30U
+#endif
+#ifndef DOZE_BREATHE_PERIOD_MS
+#define DOZE_BREATHE_PERIOD_MS 8000U
+#endif
 #define DOZE_TRANSITION_DEBOUNCE_MS 800U
 #ifndef DOZE_NIGHT_BACKLIGHT_PERCENT
 #define DOZE_NIGHT_BACKLIGHT_PERCENT 3U
@@ -292,17 +301,20 @@ void display_breathing_start(void)
         return;
     }
     s_doze_asset_loaded = true;
-    esp_err_t breathe_err = julia_backlight_breathe_start(3, 20, 6000);
+    esp_err_t breathe_err = julia_backlight_breathe_start(
+        DOZE_BREATHE_MIN_PERCENT, DOZE_BREATHE_MAX_PERCENT, DOZE_BREATHE_PERIOD_MS);
     s_power_state = DISPLAY_POWER_OFF;
     s_rendering = false;
     breathing_led_set_display_sleep(true, s_state <= JULIA_SUB_STATE_S0_3_MANUAL_SLEEP);
     s_doze_transition_finished_ms = (uint32_t)(esp_timer_get_time() / 1000);
     __atomic_store_n(&s_doze_transitioning, false, __ATOMIC_RELEASE);
 #if JULIA_DISPLAY_LOG
-    ESP_LOGI(TAG, "doze enter image_done_ms=%lu image_elapsed_ms=%.1f fade_start_ms=%lu breathe=%s min=3 max=20 fade_period_ms=6000",
+    ESP_LOGI(TAG, "doze enter image_done_ms=%lu image_elapsed_ms=%.1f fade_start_ms=%lu breathe=%s min=%u max=%u period_ms=%u zero_hold=%u%%",
              (unsigned long)image_done_ms,
              (double)(esp_timer_get_time() - image_started_us) / 1000.0,
-             (unsigned long)s_doze_transition_finished_ms, esp_err_to_name(breathe_err));
+             (unsigned long)s_doze_transition_finished_ms, esp_err_to_name(breathe_err),
+             DOZE_BREATHE_MIN_PERCENT, DOZE_BREATHE_MAX_PERCENT,
+             DOZE_BREATHE_PERIOD_MS, 15U);
 #endif
 }
 

@@ -25,6 +25,12 @@
 #define BREATHE_DEFAULT_SEGMENTS 120U
 #define BREATHE_LUT_SEGMENTS 120U
 #define BREATHE_MIN_SEGMENT_MS 5U
+/* When the configured minimum is zero, hold the backlight fully off at both
+ * ends of each cycle to reduce average power. Change this macro to tune the
+ * zero-light dwell without changing the rise/fall curve. */
+#ifndef BREATHE_ZERO_HOLD_PERCENT
+#define BREATHE_ZERO_HOLD_PERCENT 15U
+#endif
 
 /* One normalized sine cycle in Q10. Tables stay in Flash .rodata and avoid
  * floating-point work while the fade chain is running. Gamma is applied to
@@ -66,6 +72,10 @@ static uint32_t duty_for(uint8_t percent)
 
 static uint32_t curve_duty(uint16_t index)
 {
+    if (s_min_percent == 0U && BREATHE_ZERO_HOLD_PERCENT > 0U) {
+        uint16_t hold = (uint16_t)(((uint32_t)s_segments * BREATHE_ZERO_HOLD_PERCENT) / 100U);
+        if (index <= hold || index >= (uint16_t)(s_segments - hold)) return 0;
+    }
     uint16_t lut_index = (uint16_t)(((uint32_t)index * BREATHE_LUT_SEGMENTS +
                                      s_segments / 2U) / s_segments);
     if (lut_index > BREATHE_LUT_SEGMENTS) lut_index = BREATHE_LUT_SEGMENTS;

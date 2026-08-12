@@ -35,7 +35,7 @@ demo off
 | P6 | S3 主动接近 | `state 9` | 前凑转换动画峰值 |
 | P7 | S4 对话 | `state 13` | 麦克风、网络、屏幕、嘴型 |
 | P8 | S5 沉默 | `state 17` | 低活动状态 |
-| P9 | 5 分钟无操作呼吸模式 | `screen-timeout 300` 后等待 | 进入时间、背光 3%-20% 呼吸峰值 |
+| P9 | 5 分钟无操作呼吸模式 | `screen-timeout 300` 后等待 | 默认 300 秒触发，背光 0%-30%、约 8 秒周期；曲线两端默认各保持约 15% 周期的 0% 亮度 |
 | P10 | 网络断开 | 断开 AP 或使用测试环境 | 重连间隔、离线状态电流 |
 | P11 | 深度休眠 | `doze enter` | 休眠稳定电流和唤醒峰值 |
 
@@ -46,3 +46,15 @@ demo off
 - 不要把包含 Wi-Fi 密码、API Key 或 Token 的 `sdkconfig` 上传到公开仓库。
 - 本仓库不提供生产密钥；测试人员需要使用自己的测试配置。
 - UI 动画素材和语音网络请求可能产生较大瞬时峰值，应使用足够采样率的仪器观察。
+
+## 呼吸曲线参数
+
+参数集中在 `main/ui/julia_display_theme.c` 和 `main/ui/julia_backlight.c`：
+
+- `SCREEN_OFF_TIMEOUT_S`：无操作触发时间，默认 300 秒，可设置为 180-300 秒。
+- `DOZE_BREATHE_MIN_PERCENT`：最低亮度，默认 0%。
+- `DOZE_BREATHE_MAX_PERCENT`：最高亮度，默认 30%。
+- `DOZE_BREATHE_PERIOD_MS`：呼吸周期，默认 8000 ms。
+- `BREATHE_ZERO_HOLD_PERCENT`：最低亮度为 0% 时，两端零亮度保持比例，默认 15%。
+
+提高零亮度保持比例会降低平均功耗，但会让呼吸灯的暗部停留更明显；修改后应重新测量平均电流和峰值电流。
