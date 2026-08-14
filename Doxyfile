@@ -1,0 +1,65 @@
+# Julia UI public API documentation configuration.
+DOXYFILE_ENCODING       = UTF-8
+PROJECT_NAME            = "Julia UI"
+PROJECT_NUMBER          = "1.0.0"
+PROJECT_BRIEF           = "配置、事件总线与 OTA 接口契约"
+USE_MDFILE_AS_MAINPAGE  = docs/OTA_API_REFERENCE.md
+OUTPUT_DIRECTORY        = build_doxygen
+OUTPUT_LANGUAGE         = Chinese
+FULL_PATH_NAMES         = YES
+STRIP_FROM_PATH         = .
+JAVADOC_AUTOBRIEF       = YES
+OPTIMIZE_OUTPUT_FOR_C   = YES
+MARKDOWN_SUPPORT        = YES
+AUTOLINK_SUPPORT        = YES
+
+EXTRACT_ALL             = NO
+EXTRACT_PRIVATE         = NO
+EXTRACT_STATIC          = NO
+HIDE_UNDOC_MEMBERS      = NO
+HIDE_UNDOC_CLASSES      = NO
+SHOW_FILES              = YES
+SHOW_INCLUDE_FILES      = YES
+SOURCE_BROWSER          = YES
+INLINE_SOURCES          = NO
+REFERENCED_BY_RELATION  = YES
+REFERENCES_RELATION     = YES
+
+INPUT                   = main/config/julia_config.h \
+                          main/config/julia_config.c \
+                          main/events/julia_event_bus.h \
+                          main/events/julia_event_bus.c \
+                          main/ota/julia_ota.h \
+                          main/ota/julia_ota.c \
+                          docs/OTA_API_REFERENCE.md \
+                          docs/OTA_INTEGRATION_GUIDE.md \
+                          docs/OTA_HARDWARE_TEST_GUIDE.md \
+                          docs/ota_test_report_template.md \
+                          docs/CODING_STYLE.md
+FILE_PATTERNS           = *.h *.c *.md
+RECURSIVE               = NO
+EXCLUDE_SYMLINKS        = YES
+
+GENERATE_HTML           = YES
+HTML_OUTPUT             = html
+GENERATE_TREEVIEW       = YES
+DISABLE_INDEX           = NO
+GENERATE_LATEX          = NO
+GENERATE_XML            = NO
+SEARCHENGINE            = YES
+
+QUIET                   = NO
+WARNINGS                = YES
+WARN_IF_UNDOCUMENTED    = YES
+WARN_IF_DOC_ERROR       = YES
+WARN_IF_INCOMPLETE_DOC  = YES
+WARN_NO_PARAMDOC        = YES
+WARN_AS_ERROR           = FAIL_ON_WARNINGS
+WARN_FORMAT             = "$file:$line: $text"
+WARN_LOGFILE            = build_doxygen/doxygen-warnings.log
+
+TAB_SIZE                = 4
+MACRO_EXPANSION         = YES
+EXPAND_ONLY_PREDEF      = YES
+SKIP_FUNCTION_MACROS    = YES
+HAVE_DOT                = NO
